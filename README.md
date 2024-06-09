@@ -5,7 +5,7 @@ This is my very own personal repo where I also practice the general GitHub workf
 
 I'll make sure to credit everyone whose project files I use. However, I'm currently busy with uni life:D, so it might take a bit of time for me to add those mentions properly.
 
-##Still very WIP
+##Still very WIP and no Wireless drivers are yet included
 
 
 
