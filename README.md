@@ -1,5 +1,5 @@
 ## Why the need for this repo?
-I've been trying to add support for the Orange Pi Zero 3, and some people have managed to get it working. This repository adds some additional patches that I've found on the internet, making it boot with the latest kernel and WiFi driver (still a work in progress)
+I've been trying to add support for the Orange Pi Zero 3, and thanks to some people it's booting and working. This repository adds some additional patches that I've found on the internet, making it boot with the latest kernel and WiFi driver (still a work in progress)
 
 This is my very own personal repo where I also practice the general GitHub workflow, so any bug mentions are welcome, but don't expect them to be solved.
 
