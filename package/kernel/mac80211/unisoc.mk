@@ -17,7 +17,7 @@ define KernelPackage/uwe5622
   FILES:= \
     $(PKG_BUILD_DIR)/drivers/net/wireless/uwe5622/unisocwifi/sprdwl_ng.ko \
     $(PKG_BUILD_DIR)/drivers/net/wireless/uwe5622/unisocwcn/uwe5622_bsp_sdio.ko \
-    $(PKG_BUILD_DIR)/drivers/net/wireless/sunxi-rfkill/sunxi_rfkill.ko
+    $(PKG_BUILD_DIR)/drivers/misc/sunxi-rfkill/sunxi_rfkill.ko
   AUTOLOAD:=$(call AutoProbe,sprdwl_ng)
 endef
 
