@@ -18,6 +18,19 @@ define Build/elecom-header
 		--owner=0 --group=0 -f $@ -C $(KDIR) v_0.0.0.bin v_0.0.0.md5
 endef
 
+define Device/mt7620a_qoro
+  SOC := mt7620a
+  DTS := mt7620a_mt7620a_qoro
+  IMAGE_SIZE := 7744k
+  DEVICE_VENDOR := Qoro
+  DEVICE_MODEL := Qoro
+  DEVICE_PACKAGES := kmod-usb2 kmod-usb-ohci
+  SUPPORTED_DEVICES += mt7620a_qoro
+  IMAGE/sysupgrade.bin := append-kernel | append-rootfs | pad-rootfs | append-metadata
+  IMAGE/factory.bin := append-kernel | append-rootfs | pad-rootfs | check-size
+endef
+TARGET_DEVICES += mt7620a_qoro
+
 define Device/aigale_ai-br100
   SOC := mt7620a
   IMAGE_SIZE := 7936k
