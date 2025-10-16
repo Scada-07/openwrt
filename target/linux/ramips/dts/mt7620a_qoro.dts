@@ -7,7 +7,7 @@
 
 / {
 	compatible = "qoro,qoro-wifi", "ralink,mt7620a-soc";
-	model = "QORO-WIFIUWU";
+	model = "QORO";
 
 	aliases {
 		led-boot = &led_wlan;
