@@ -1,108 +1,90 @@
-![OpenWrt logo](include/logo.png)
 
-OpenWrt Project is a Linux operating system targeting embedded devices. Instead
-of trying to create a single, static firmware, OpenWrt provides a fully
-writable filesystem with package management. This frees you from the
-application selection and configuration provided by the vendor and allows you
-to customize the device through the use of packages to suit any application.
-For developers, OpenWrt is the framework to build an application without having
-to build a complete firmware around it; for users this means the ability for
-full customization, to use the device in ways never envisioned.
 
-Sunshine!
+# S4005EF — OpenWrt  Guide
 
-## Download
+**Target device:** S4005EF
+**SoC:** MediaTek MT7620 (mt7620)
+**Purpose:** Recover access, flash a custom image, and network configuration via UART.
 
-Built firmware images are available for many architectures and come with a
-package selection to be used as WiFi home router. To quickly find a factory
-image usable to migrate from a vendor stock firmware to OpenWrt, try the
-*Firmware Selector*.
+---
 
-* [OpenWrt Firmware Selector](https://firmware-selector.openwrt.org/)
+## Prerequisites
 
-If your device is supported, please follow the **Info** link to see install
-instructions or consult the support resources listed below.
+* A TTL to USB serial adapter (3.3 V). This is mandatory for console access.
+* A computer running Linux (or macOS/Windows with equivalent tools).
+* `screen`, `hexdump`, `dd`, `binwalk` (optional), `hashcat` (optional).
+* The vendor factory firmware binary or a full flash dump (`backup.bin`).
+---
 
-## 
+###  Prepare serial connection
 
-An advanced user may require additional or specific package. (Toolchain, SDK, ...) For everything else than simple firmware download, try the wiki download page:
+1. Connect the TTL adapter to the router UART pins (RX, TX, GND).
+2. On your PC identify the serial device (commonly `/dev/ttyUSB0` or `/dev/ttyACM0`).
 
-* [OpenWrt Wiki Download](https://openwrt.org/downloads)
+Start a serial console:
 
-## Development
-
-To build your own firmware you need a GNU/Linux, BSD or macOS system (case
-sensitive filesystem required). Cygwin is unsupported because of the lack of a
-case sensitive file system.
-
-### Requirements
-
-You need the following tools to compile OpenWrt, the package names vary between
-distributions. A complete list with distribution specific packages is found in
-the [Build System Setup](https://openwrt.org/docs/guide-developer/build-system/install-buildsystem)
-documentation.
-
-```
-binutils bzip2 diff find flex gawk gcc-6+ getopt grep install libc-dev libz-dev
-make4.1+ perl python3.7+ rsync subversion unzip which
+```bash
+sudo screen /dev/ttyUSB0 57600
 ```
 
-### Quickstart
+the credentials for the webui are:
 
-1. Run `./scripts/feeds update -a` to obtain all the latest package definitions
-   defined in feeds.conf / feeds.conf.default
+* **Username:** `R3000admin`
+* **Password:** `admin`
 
-2. Run `./scripts/feeds install -a` to install symlinks for all obtained
-   packages into package/feeds/
+###  Flash the system image
 
-3. Run `make menuconfig` to select your preferred configuration for the
-   toolchain, target system & firmware packages.
+1. Log into the router web UI (vendor/admin page).
+2. Upload the correct system upgrade image (follow vendor web UI steps).
+3. After the device flashes and reboots, it will boot into a state with no functional network config. At this point you will need the UART.
 
-4. Run `make` to build your firmware. This will download all sources, build the
-   cross-compile toolchain and then cross-compile the GNU/Linux kernel & all chosen
-   applications for your target system.
+### 5. Restore network configuration via UART console
 
-### Related Repositories
+1. Open serial console (as above).
+2. Wait until the system boots and you see a login prompt. Press Enter 20 seconds after boot.
+3. Remove the broken `network` config and replace it with a minimal working configuration:
 
-The main repository uses multiple sub-repositories to manage packages of
-different categories. All packages are installed via the OpenWrt package
-manager called `opkg`. If you're looking to develop the web interface or port
-packages to OpenWrt, please find the fitting repository below.
+Commands:
 
-* [LuCI Web Interface](https://github.com/openwrt/luci): Modern and modular
-  interface to control the device via a web browser.
+```sh
+# backup current config
+cp /etc/config/network /tmp/network.bak
 
-* [OpenWrt Packages](https://github.com/openwrt/packages): Community repository
-  of ported packages.
+# remove the file
+rm /etc/config/network
 
-* [OpenWrt Routing](https://github.com/openwrt/routing): Packages specifically
-  focused on (mesh) routing.
+# create a new minimal network config
+cat > /etc/config/network <<'EOF'
+config switch
+    option name 'switch0'
+    option reset '1'
+    option enable_vlan '1'
 
-* [OpenWrt Video](https://github.com/openwrt/video): Packages specifically
-  focused on display servers and clients (Xorg and Wayland).
+config switch_vlan
+    option device 'switch0'
+    option vlan '1'
+    option ports '0 1 2 3 6t'
 
-## Support Information
+config switch_vlan
+    option device 'switch0'
+    option vlan '2'
+    option ports '4 6t'
 
-For a list of supported devices see the [OpenWrt Hardware Database](https://openwrt.org/supported_devices)
+config device
+    option name 'br-lan'
+    option type 'bridge'
+    list ports 'eth0.1'
 
-### Documentation
+config interface 'lan'
+    option device 'br-lan'
+    option proto 'static'
+    option ipaddr '192.168.1.1'
+    option netmask '255.255.255.0'
 
-* [Quick Start Guide](https://openwrt.org/docs/guide-quick-start/start)
-* [User Guide](https://openwrt.org/docs/guide-user/start)
-* [Developer Documentation](https://openwrt.org/docs/guide-developer/start)
-* [Technical Reference](https://openwrt.org/docs/techref/start)
+config interface 'wan'
+    option device 'eth0.2'
+    option proto 'dhcp'
+EOF
+```
+---
 
-### Support Community
-
-* [Forum](https://forum.openwrt.org): For usage, projects, discussions and hardware advise.
-* [Support Chat](https://webchat.oftc.net/#openwrt): Channel `#openwrt` on **oftc.net**.
-
-### Developer Community
-
-* [Bug Reports](https://bugs.openwrt.org): Report bugs in OpenWrt
-* [Dev Mailing List](https://lists.openwrt.org/mailman/listinfo/openwrt-devel): Send patches
-* [Dev Chat](https://webchat.oftc.net/#openwrt-devel): Channel `#openwrt-devel` on **oftc.net**.
-
-## License
-
-OpenWrt is licensed under GPL-2.0
